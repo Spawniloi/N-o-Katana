@@ -1,0 +1,72 @@
+# Variable pour stocker le temps écoulé depuis la dernière apparition d'un ennemi
+enemy_spawn_timer = 0
+spawn_interval = 5 * 1000  # 5 secondes en millisecondes
+
+# Boucle principale du jeu
+while True:
+    current_time = pygame.time.get_ticks()  # Obtenir le temps actuel en millisecondes
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Gérer les événements de déplacement et d'attaque du joueur
+    keys = pygame.key.get_pressed()
+    if any(keys):
+        player.update()
+        camera.update(player)
+        if keys[pygame.K_SPACE]:
+            player.attack()
+
+    # Mettre à jour la position de l'ennemi pour qu'il se déplace vers le joueur
+    enemies.update()
+
+    # Vérifier la collision entre le joueur et l'ennemi
+    for enemy in enemies:
+        if player.rect.colliderect(enemy.rect):
+            # Enregistrer les positions précédentes du joueur et de l'ennemi
+            prev_player_pos = player.rect.topleft
+            prev_enemy_pos = enemy.rect.topleft
+
+            # Déplacer le joueur et l'ennemi vers leur position précédente
+            player.rect.topleft = prev_player_pos
+            enemy.rect.topleft = prev_enemy_pos
+
+            # Calculer le vecteur de rebond
+            dx = player.rect.centerx - enemy.rect.centerx
+            dy = player.rect.centery - enemy.rect.centery
+            # Normaliser le vecteur
+            length = max(1, math.hypot(dx, dy))
+            dx /= length
+            dy /= length
+
+            # Déplacer le joueur et l'ennemi dans des directions opposées pour simuler un rebond
+            player.rect.x += dx * PLAYER_SPEED
+            player.rect.y += dy * PLAYER_SPEED
+            enemy.rect.x -= dx * enemy.speed
+            enemy.rect.y -= dy * enemy.speed
+
+            # Autoriser le joueur à attaquer après la collision
+            if player.attacking:
+                enemy.hit()  # Supprimer l'ennemi après avoir été attaqué avec succès
+
+    # Vérifier si le temps écoulé dépasse le délai d'apparition des ennemis
+    if current_time - enemy_spawn_timer > spawn_interval:
+        # Créer un nouvel ennemi
+        new_enemy = Enemy(0, SCREEN_HEIGHT, enemy_speed)
+        enemies.add(new_enemy)
+        enemy_spawn_timer = current_time  # Réinitialiser le minuteur
+
+    # Dessiner l'écran
+    screen.fill(WHITE)
+    for sprite in all_sprites:
+        screen.blit(sprite.image, camera.apply(sprite))  # Dessiner les autres sprites
+    for enemy in enemies:
+        screen.blit(enemy.image, camera.apply(enemy))  # Dessiner les ennemis
+
+    # Mettre à jour l'affichage
+    pygame.display.flip()
+
+    # Contrôler la vitesse de rafraîchissement
+    pygame.time.Clock().tick(60)  # Ajuster la vitesse d'animation en changeant le nombre de ticks

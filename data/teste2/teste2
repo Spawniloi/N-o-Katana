@@ -25,9 +25,6 @@ pygame.display.set_caption("Jeu avec des Sprites")
 # Charger la spritesheet du joueur (256x256 pixels)
 player_spritesheet = pygame.image.load("player_spritesheet.png")
 
-# Charger la police
-font = pygame.font.Font(None, 36)
-
 # Fonction pour découper une spritesheet en une liste d'images
 def get_sprites_from_spritesheet(spritesheet, sprite_size, row):
     sprites = []
@@ -212,17 +209,6 @@ class Enemy(pygame.sprite.Sprite):
             self.direction = 'up'
         self.image = self.images[self.direction][self.image_index]
 
-        # Calculer la distance entre l'ennemi et le joueur
-        distance_to_player = math.hypot(player.rect.centerx - self.rect.centerx, player.rect.centery - self.rect.centery)
-        # Vérifier si l'ennemi est à portée d'attaque
-
-        if distance_to_player <= self.attack_range:
-            if player.attacking:
-                self.hit()  # Supprimer l'ennemi après avoir été attaqué avec succès
-            else:
-                self.attack()  # Déclencher l'attaque de l'ennemi sur le joueur
-                player.take_damage(self.damage)  # Réduire la santé du joueur
-
     def set_target(self, target):
         self.target = target
 
@@ -230,11 +216,12 @@ class Enemy(pygame.sprite.Sprite):
         # Supprimer l'ennemi du groupe
         self.kill()
         player.take_damage(self.damage)  # Infliger des dégâts au joueur
-
-# Création des ennemis avec une portée d'attaque spécifique
+        
+# Création des ennemis
 enemies = pygame.sprite.Group()
-enemies.add(Enemy(200, 200, 2, attack_range=100))  # Utilisation d'un argument nommé attack_range
+enemies.add(Enemy(200, 200, 2))  # Par exemple, la vitesse est définie à 2
 
+        
 # Créer un groupe de sprites
 all_sprites = pygame.sprite.Group()
 all_sprites.add(enemies)
@@ -294,6 +281,7 @@ while True:
         if keys[pygame.K_SPACE]:
             player.attack()  # Appel de la méthode d'attaque du joueur
 
+
     # Vérifier la collision entre le joueur et l'ennemi
     for enemy in enemies:
         if player.rect.colliderect(enemy.rect):
@@ -339,13 +327,8 @@ while True:
         if camera.apply(enemy).colliderect(screen.get_rect()):
             screen.blit(enemy.image, camera.apply(enemy))  # Dessiner les ennemis
 
-    # Dessiner la vie du joueur en haut à droite de l'écran
-    player_health_text = font.render("Health: " + str(player.health), True, BLACK)
-    screen.blit(player_health_text, (SCREEN_WIDTH - player_health_text.get_width() - 10, 10))
-
     # Mettre à jour l'affichage
     pygame.display.flip()
 
     # Contrôler la vitesse de rafraîchissement
     pygame.time.Clock().tick(60)  # Ajuster la vitesse d'animation en changeant le nombre de ticks
-
