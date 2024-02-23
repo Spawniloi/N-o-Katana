@@ -147,3 +147,4 @@ while True:
 
     # Contrôler la vitesse de rafraîchissement
     pygame.time.Clock().tick(60)  # Ajuster la vitesse d'animation en changeant le nombre de ticks
+
