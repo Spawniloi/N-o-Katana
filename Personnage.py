@@ -1,48 +1,5 @@
 import pygame
-
 class Game :
-    def __init__(self, width, height):
-        print("init")
-        pygame.init()
-        self.screen_width = width
-        self.screen_height = height
-        self.screen = pygame.display.set_mode((self.screen_width, self.screen_height))
-        pygame.display.set_caption("Néon-Katana")
-    
-    def draw (self) :
-        print("draw")
-        # Effacer l'écran avec une couleur de fond
-        self.screen.fill((0, 0, 0))
-
-        # Dessiner d'autres éléments du jeu ici, tels que des sprites, des textes, etc.
-
-        # Mettre à jour l'affichage pour montrer les changements
-        pygame.display.flip()
-
-    def update (self) :
-        print("update")
-        # Mettre à jour la logique du jeu ici, telle que la mise à jour des positions des sprites, la gestion des collisions, etc.
-
-    def loop (self) :
-        print("loop")
-            #event
-        running = True
-        while running:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-            self.update()
-            self.draw()
-
-    def run_game(self):
-        self.loop()
-            # Autres mises à jour et rendus du jeu ici
-
-        pygame.quit()  
-
-
-
-class Map :
     def __init__(self, screen, clock, width, height):
         self.screen = screen
         self.clock= clock
@@ -98,3 +55,12 @@ class TeleportZone:
         if player_rect.colliderect(self.rect) and keys[pygame.K_RETURN]:
             return True
         return False
+
+
+
+
+
+
+
+
+

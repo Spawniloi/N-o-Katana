@@ -243,6 +243,7 @@ enemy_speed = 3  # Vitesse de déplacement de l'ennemi
 # Initialiser un ennemi en bas à gauche de l'écran avec une certaine vitesse
 enemy = Enemy(0, SCREEN_HEIGHT, enemy_speed)
 enemies.add(enemy)
+
 # Créer la carte et le joueur, et les ajouter au groupe
 game_map = GameMap("map.jpg")
 player = Player(SCREEN_WIDTH // 2 - PLAYER_SIZE // 2, SCREEN_HEIGHT // 2 - PLAYER_SIZE // 2, game_map.width, game_map.height)

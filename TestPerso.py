@@ -1,6 +1,6 @@
 import pygame
 import sys
-from classes import Game, Player
+from classes import Map, Player
 from Chateau import ChateauGame, PlayerChateau
 
 # Initialisation de Pygame
@@ -28,7 +28,7 @@ class GameMap(pygame.sprite.Sprite):
 
 #global player,map_image,map_rect,game_map,SCREEN_WIDTH,SCREEN_HEIGHT,PLAYER_WIDTH,PLAYER_HEIGHT,PLAYER_SPEED,GRAVITY,JUMP_SPEED,chateau_image,chateau_rect,scale_factor,player_x,player_y,player_dx,player_dy,chateau_x, player_index,player_frames, player_spritesheet
 
-class MainGame(Game):
+class MainGame(Map):
     def __init__(self, screen, clock, width, height):
         super().__init__(screen, clock, width, height)
         # Charger l'image de la carte
@@ -38,13 +38,20 @@ class MainGame(Game):
         # Créer les sprites
         self.game_map = GameMap(self.map_image)
         self.player = Player(self.map_rect)
+        self.player.on_map_change.append(self.change_map)
 
         # Créer un groupe de sprites
         self.all_sprites = pygame.sprite.Group()
         self.all_sprites.add(self.game_map, self.player)  # Ajouter la carte dans le groupe
 
+    def change_map(self):
+        pass
+
     def game_update(self):
         self.player.update()
+
+            # Afficher les coordonnées du joueur
+        print("Coordonnées du joueur :", self.player.rect.x, self.player.rect.y)
 
         # Centre la caméra sur le joueur
         self.camera_x = max(0, min(self.player.rect.x - self.SCREEN_WIDTH // 2, self.map_rect.width - self.SCREEN_WIDTH))
@@ -79,7 +86,5 @@ while running:
                 actual_game=chateau_game
     actual_game.game_update()
 
- 
 pygame.quit()
 sys.exit()
-
