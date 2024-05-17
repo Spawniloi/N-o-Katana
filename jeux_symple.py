@@ -76,10 +76,10 @@ player_sprites_left = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SI
 player_sprites_right = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 2)
 
 # Obtenir la liste de sprites d'attaque du joueur pour chaque direction
-player_sprites_attack_up = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 0)
-player_sprites_attack_down = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 3)
-player_sprites_attack_left = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 2)
-player_sprites_attack_right = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 1)
+player_sprites_attack_up = get_sprites_from_spritesheet(player_sprites_attack, PLAYER_SIZE, 0)
+player_sprites_attack_down = get_sprites_from_spritesheet(player_sprites_attack, PLAYER_SIZE, 1)
+player_sprites_attack_left = get_sprites_from_spritesheet(player_sprites_attack, PLAYER_SIZE, 0)
+player_sprites_attack_right = get_sprites_from_spritesheet(player_sprites_attack, PLAYER_SIZE, 1)
 
 # Créer une classe pour la carte
 class GameMap(pygame.sprite.Sprite):
@@ -109,7 +109,7 @@ class Player(pygame.sprite.Sprite):
         self.map_width = map_width
         self.map_height = map_height
         self.map_rect = pygame.Rect(0, 0, map_width, map_height)  # Créer un rectangle pour représenter la carte
-        self.attack_range = 150
+        self.attack_range = 120
         self.attacking = False
         self.attack_anim_frames = 4
         self.current_frame = 0
@@ -119,7 +119,8 @@ class Player(pygame.sprite.Sprite):
         self.frame_timer = 0
         self.frame_duration = 100  # Durée de chaque frame en millisecondes
         self.is_moving = False  # Indicateur pour savoir si le joueur est en mouvement
-        
+        self.attack_delay = 500  # Délai en millisecondes entre les attaques
+        self.last_attack_time = 0  # Temps du dernier coup d'attaque
         
     def update(self, enemies):
          # Gérer le déplacement du joueur
@@ -148,6 +149,12 @@ class Player(pygame.sprite.Sprite):
                 self.frame_timer = 0
                 self.image_index = (self.image_index + 1) % len(self.images[self.direction])
                 self.image = self.images[self.direction][self.image_index]
+
+            # Vérifier si le joueur est en train d'attaquer
+        if self.attacking:
+            # Mettre à jour l'animation d'attaque
+            self.attack_animation()
+
 
     def draw_health(self, screen):
         # Créez une surface de texte pour afficher les points de vie
@@ -205,9 +212,23 @@ class Player(pygame.sprite.Sprite):
             # Déclencher le "Game Over"
             game_over()
 
+    def attack_animation(self):
+        # Vérifier si l'animation d'attaque est terminée
+        if self.current_frame == self.attack_anim_frames - 1:
+            self.attacking = False  # Arrêter l'attaque une fois l'animation terminée
+            self.current_frame = 0  # Réinitialiser le compteur de frames d'attaque
+            self.image = self.images[self.direction][self.image_index]  # Revenir à l'image normale du joueur
+        else:
+            # Mettre à jour l'image d'attaque pour l'animation
+            self.frame_timer += self.clock.tick()
+            if self.frame_timer >= self.frame_duration:
+                self.frame_timer = 0
+                self.current_frame += 1
+                self.image = self.images['attack_' + self.direction][self.current_frame]
 
 # Charger la spritesheet du monstre (256x256 pixels)
 monster_spritesheet = pygame.image.load("monster_spritesheet.png")
+monster_sprites_attack = pygame.image.load("enemis_sprit_attaque.png")
 
 # Obtenir la liste de sprites du monstre pour chaque direction
 monster_sprites_up = get_sprites_from_spritesheet(monster_spritesheet, MONSTER_SIZE, 3)
@@ -215,11 +236,11 @@ monster_sprites_down = get_sprites_from_spritesheet(monster_spritesheet, MONSTER
 monster_sprites_left = get_sprites_from_spritesheet(monster_spritesheet, MONSTER_SIZE, 1)
 monster_sprites_right = get_sprites_from_spritesheet(monster_spritesheet, MONSTER_SIZE, 2)
 
-# Obtenir la liste de sprites d'attaque du joueur pour chaque direction
-monster_sprites_attack_up = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 0)
-monster_sprites_attack_down = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 3)
-monster_sprites_attack_left = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 2)
-monster_sprites_attack_right = get_sprites_from_spritesheet(player_spritesheet, PLAYER_SIZE, 1)
+# Obtenir la liste de sprites d'attaque du monstre pour chaque direction
+monster_sprites_attack_up = get_sprites_from_spritesheet(monster_sprites_attack, MONSTER_SIZE, 0)
+monster_sprites_attack_down = get_sprites_from_spritesheet(monster_sprites_attack, MONSTER_SIZE, 1)
+monster_sprites_attack_left = get_sprites_from_spritesheet(monster_sprites_attack, MONSTER_SIZE, 0)
+monster_sprites_attack_right = get_sprites_from_spritesheet(monster_sprites_attack, MONSTER_SIZE, 1)
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, x, y, speed, attack_range):
@@ -296,18 +317,16 @@ class Enemy(pygame.sprite.Sprite):
 
 # Création des ennemis avec une portée d'attaque spécifique
 enemies = pygame.sprite.Group()
-enemies.add(Enemy(200, 200, 2, 100))  # Passer l'argument attack_range
+enemies.add(Enemy(200, 200, 2, 50))  # Passer l'argument attack_range
 
 # Créer un groupe de sprites
 all_sprites = pygame.sprite.Group()
 all_sprites.add(enemies)
 enemy_speed = 3  # Vitesse de déplacement de l'ennemi
 
-# Initialiser un ennemi en bas à gauche de l'écran avec une certaine vitesse
-enemy = Enemy(0, SCREEN_HEIGHT, enemy_speed, 10)
-enemies.add(enemy)
+
 # Créer la carte et le joueur, et les ajouter au groupe
-game_map = GameMap("map.jpg")
+game_map = GameMap("map.png")
 player = Player(SCREEN_WIDTH // 2 - PLAYER_SIZE // 2, SCREEN_HEIGHT // 2 - PLAYER_SIZE // 2, game_map.width, game_map.height)
 all_sprites.add(game_map, player)
 
@@ -368,12 +387,18 @@ while True:
         # Si le joueur sort de la carte, le ramener à l'intérieur
         player.rect.clamp_ip(game_map.rect)
 
-    # Vérifier si le temps écoulé dépasse le délai d'apparition des ennemisq
+    # Vérifier si le temps écoulé dépasse le délai d'apparition des ennemis
     if current_time - enemy_spawn_timer > spawn_interval:
-        # Créer un nouvel ennemi
-        new_enemy = Enemy(0, SCREEN_HEIGHT, enemy_speed,100)
-        enemies.add(new_enemy)
+        # Positions des coins de la carte
+        corner_positions = [(0, 0), (game_map.rect.width - MONSTER_SIZE, 0), (0, game_map.rect.height - MONSTER_SIZE), (game_map.rect.width - MONSTER_SIZE, game_map.rect.height - MONSTER_SIZE)]
+        
+        # Créer un nouvel ennemi à chaque coin de la carte
+        for position in corner_positions:
+            new_enemy = Enemy(position[0], position[1], enemy_speed, 50)
+            enemies.add(new_enemy)
+            
         enemy_spawn_timer = current_time  # Réinitialiser le minuteur
+
 
     # Dessiner l'écran
     screen.fill(WHITE)
