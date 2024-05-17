@@ -52,6 +52,7 @@ def game_over():
 
 # Charger la spritesheet du joueur (256x256 pixels)
 player_spritesheet = pygame.image.load("player_spritesheet.png")
+player_sprites_attack = pygame.image.load("attaque.png")
 
 # Charger la police
 font = pygame.font.Font(None, 36)
