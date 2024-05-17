@@ -1,6 +1,6 @@
 import pygame
 import sys
-from classes import Game, Player
+from classes import Map, Player
 
 class PlayerChateau(Player):
     def update(self):
@@ -8,7 +8,7 @@ class PlayerChateau(Player):
 
 # Définir les constantes
 
-class ChateauGame (Game):
+class ChateauGame (Map):
 
     def __init__(self, screen, clock, width, height):
         super().__init__(screen, clock, width, height)
